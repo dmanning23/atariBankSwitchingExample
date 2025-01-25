@@ -1,0 +1,199 @@
+
+    processor 6502
+    include "vcs.h"
+    include "macro.h"
+    include "xmacro.h"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Constants segment
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+SpriteHeight equ 8
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Variables segment
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    seg.u Variables
+    org $80
+
+YPos .byte
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Code segment
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Macro that implements Bank Switching trampoline
+; X = bank number
+; A = hi byte of destination PC
+; Y = lo byte of destination PC
+	MAC BANK_SWITCH_TRAMPOLINE
+        pha             ; push hi byte
+        tya             ; Y -> A
+        pha             ; push lo byte
+        lda $1FF8,x     ; do the bank switch
+        rts             ; return to target
+    ENDM
+
+; Macro that performs bank switch
+    MAC BANK_SWITCH
+.Bank   SET {1}
+.Addr   SET {2}
+        lda #>(.Addr-1)
+        ldy #<(.Addr-1)
+        ldx #.Bank
+        jmp BankSwitch
+    ENDM
+
+; Bank prologue that handles reset
+; no matter which bank is selected at powerup
+; it switches to bank 0 and jumps to Reset_0
+	MAC BANK_PROLOGUE
+        lda #>(Reset_0-1)
+        ldy #<(Reset_0-1)
+        ldx #$ff
+        txs		; set up stack pointer
+        inx		; X = 0
+    ENDM
+
+; Bank epilogue -- 6502 vectors
+    MAC BANK_VECTORS
+        .word Start      ; NMI
+        .word Start      ; RESET
+        .word Start	 ; BRK
+    ENDM
+
+    seg Code
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 0
+
+    org  $1000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+Reset_0
+    CLEAN_START
+
+    lda #15
+    sta YPos
+
+NextFrame
+
+    ; 1 + 3 lines of VSYNC
+    VERTICAL_SYNC
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; 35 lines of underscan
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    TIMER_SETUP 35
+    TIMER_WAIT
+
+    ; Switch to Bank 2 routine
+    BANK_SWITCH 1,LinesOfFrame
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; 29 lines of overscan
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+OverScan
+    TIMER_SETUP 29
+    TIMER_WAIT
+
+    ; total = 262 lines, go to next frame
+    jmp NextFrame
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 0 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	org  $1FFA
+	rorg $FFFA
+	BANK_VECTORS
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 1
+
+    org  $2000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+LinesOfFrame
+    ; 192 lines of frame
+    ldx #192	; X = 192 scanlines
+LVScan
+    txa		; X -> A
+    sec		; set carry for subtract
+    sbc YPos	; local coordinate
+    cmp #SpriteHeight ; in sprite?
+    bcc InSprite	; yes, skip over next
+    lda #0		; not in sprite, load 0
+InSprite
+    tay		; local coord -> Y
+    lda Frame0,y	; lookup color
+    sta WSYNC	; sync w/ scanline
+    sta GRP0	; store bitmap
+    lda ColorFrame0,y ; lookup color
+    sta COLUP0	; store color
+    dex		; decrement X
+    bne LVScan	; repeat until 192 lines
+
+    ;Jump back to bank 0 for overscan
+     BANK_SWITCH 0,OverScan
+
+; Cat-head graphics data
+Frame0
+        .byte #0        ; zero padding, also clears register
+        .byte #%00111100
+        .byte #%01000010
+        .byte #%11100111
+        .byte #%11111111
+        .byte #%10011001
+        .byte #%01111110
+        .byte #%11000011
+        .byte #%10000001
+
+; Cat-head color data
+ColorFrame0
+        .byte #0        ; unused (for now)
+        .byte #$AE
+        .byte #$AC
+        .byte #$A8
+        .byte #$AC
+        .byte #$8E
+        .byte #$8E
+        .byte #$98
+        .byte #$94
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 1 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $2FFA
+    rorg $FFFA
+    BANK_VECTORS
