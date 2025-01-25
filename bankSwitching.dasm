@@ -56,7 +56,7 @@ YPos .byte
 ; Bank prologue that handles reset
 ; no matter which bank is selected at powerup
 ; it switches to bank 0 and jumps to Reset_0
-	MAC BANK_PROLOGUE
+    MAC BANK_PROLOGUE
         lda #>(Reset_0-1)
         ldy #<(Reset_0-1)
         ldx #$ff
@@ -126,9 +126,9 @@ OverScan
     ; Bank 0 epilogue
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	org  $1FFA
-	rorg $FFFA
-	BANK_VECTORS
+    org  $1FFA
+    rorg $FFFA
+    BANK_VECTORS
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; BANK 1
