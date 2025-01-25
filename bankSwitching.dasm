@@ -35,7 +35,7 @@ YPos .byte
 ; X = bank number
 ; A = hi byte of destination PC
 ; Y = lo byte of destination PC
-	MAC BANK_SWITCH_TRAMPOLINE
+    MAC BANK_SWITCH_TRAMPOLINE
         pha             ; push hi byte
         tya             ; Y -> A
         pha             ; push lo byte
