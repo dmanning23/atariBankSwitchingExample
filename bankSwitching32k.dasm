@@ -37,7 +37,7 @@ YPos .byte
         pha             ; push hi byte
         tya             ; Y -> A
         pha             ; push lo byte
-        lda $1FF8,x     ; do the bank switch
+        lda $1FF4,x     ; do the bank switch <--- VERY IMPORTANT for 16k games! To do a 32k game, map to 1FF4
         rts             ; return to target
     ENDM
 
@@ -128,6 +128,8 @@ OverScan
     rorg $FFFA
     BANK_VECTORS
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; BANK 1
 
@@ -193,5 +195,144 @@ ColorFrame0
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     org  $2FFA
+    rorg $FFFA
+    BANK_VECTORS
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 2
+
+    org  $3000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 2 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $3FFA
+    rorg $FFFA
+    BANK_VECTORS
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 3
+
+    org  $4000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 3 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $4FFA
+    rorg $FFFA
+    BANK_VECTORS
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 4
+
+    org  $5000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 4 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $5FFA
+    rorg $FFFA
+    BANK_VECTORS
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 5
+
+    org  $6000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 5 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $6FFA
+    rorg $FFFA
+    BANK_VECTORS
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 6
+
+    org  $7000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 6 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $7FFA
+    rorg $FFFA
+    BANK_VECTORS
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; BANK 7
+
+    org  $8000
+    rorg $F000
+;----The following code is the same on both banks----
+Start
+    BANK_PROLOGUE
+BankSwitch
+    BANK_SWITCH_TRAMPOLINE
+;----End of bank-identical code----
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ; Bank 7 epilogue
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    org  $8FFA
     rorg $FFFA
     BANK_VECTORS
